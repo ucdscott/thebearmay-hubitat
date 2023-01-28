@@ -106,7 +106,7 @@ void close() {
 
 // HTTP GET to toggle relay
 void toggleDoor() {
-    if(logEnable) log.debug "Toggling ${device.displayName}..."
+    if(txtEnable) log.info "Toggling ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -121,7 +121,7 @@ void toggleDoor() {
 }
 
 void rebootDevice() {
-    if(logEnable) log.debug "Rebooting ${device.displayName}..."
+    if(txtEnable) log.info "Rebooting ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
