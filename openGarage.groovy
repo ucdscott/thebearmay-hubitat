@@ -44,21 +44,15 @@ metadata {
 }
 
 preferences {
-    	input("devIP", "string", title: "IP of the Open Garage Device", width:4)
+    	input("devIP", "string", title: "IP of the OpenGarage Device", width:4)
     	input("devPwd", "password", title: "Device Password", width:4)
     	input("pollRate","number", title: "Polling interval in seconds (0 to disable)", width:4)
-	input (name: "txtEnable", type: "bool", title: "Enable descriptionText logging", required: false, defaultValue: false)
+	input (name: "txtEnable", type: "bool", title: "Enable descriptionText logging", defaultValue: false)
 	input("logEnable", "bool", title: "Enable debug logging", defaultValue: false)
 }
 
-def logInfo(msg) {
-	if (txtEnable) {
-		log.info msg
-	}
-}
-
 def installed() {
-    log.trace "Open Garage v${version()} installed()"
+    log.trace "OpenGarage v${version()} installed()"
     device.updateSetting("devIP",[value:"192.168.4.1",type:"string"])
     device.updateSetting("devPwd",[value:"opendoor",type:"password"]) 
     device.updateSetting("pollRate",[value:0,type:"number"]) 
@@ -79,7 +73,7 @@ def updated(){
 
 // HTTP GET to open relay
 void open() {
-    if(txtEnable) log.info "opening relay..."
+    if(txtEnable) log.info "Opening ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -95,7 +89,7 @@ void open() {
 
 // HTTP GET to close relay. Ignored is door is already closed.
 void close() {
-    if(txtEnable) log.info "closing relay..."
+    if(txtEnable) log.info "Closing ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -111,7 +105,7 @@ void close() {
 
 // HTTP GET to toggle relay
 void toggleDoor() {
-    if(txtEnable) log.debug "toggling realy..."
+    if(txtEnable) log.debug "Toggling ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -126,7 +120,7 @@ void toggleDoor() {
 }
 
 void rebootDevice() {
-    if(logEnable) log.debug "rebooting.."
+    if(logEnable) log.debug "Rebooting ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -146,6 +140,7 @@ void updateAttr(String aKey, aValue, String aUnit = ""){
 }
 
 void poll(){
+    if(txtEnable) log.info "Polling ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -193,26 +188,28 @@ void processJc(dMap){
    updateAttr("distance", dMap.dist, "cm")
    updateAttr("rssi", dMap.rssi, "dBm")
 	
-   if(dMap.door.toInteger() == 1 && device.currentValue("door") != "open") {
-        descriptionText = "${device.displayName} = open"
-        logInfo descriptionText
-	updateAttr("door","open")
-   } else{
-        if(dMap.door.toInteger() == 0 && device.currentValue("door") != "closed") {
-		descriptionText = "${device.displayName} = closed"
-        	logInfo descriptionText
+   if(dMap.door.toInteger() == 1) {
+	if (device.currentValue("door") != "open"){
+		if(txtEnable) log.info "${device.displayName} has opened"
+		updateAttr("door","open")
+	}
+   } else{ // door == 0
+        if(device.currentValue("door") != "closed") {
+		if(txtEnable) log.info "${device.displayName} has closed"
 		updateAttr("door", "closed")
 	}
     }
 	    
-    if(dMap.vehicle.toInteger() == 1 && device.currentValue("vehStatus") != "present"){
-        descriptionText = "${device.displayName} vehStatus = present"
-        logInfo descriptionText
-	updateAttr("vehStatus", "present")
-    } else {
-	if(dMap.vehicle.toInteger() == 0 && device.currentValue("vehStatus") != "not present"){
-		descriptionText = "${device.displayName} vehStatus = not present"
-		logInfo descriptionText
+    if(dMap.vehicle.toInteger() == 1){
+	// If vehStatus has changed, log and update attribute
+	if (device.currentValue("vehStatus") != "present"){
+		if(txtEnable) log.info "${device.displayName} has arrived"
+		updateAttr("vehStatus", "present")
+	}
+    } else { // vehicle == 0
+		
+	if(device.currentValue("vehStatus") != "not present"){
+		if(txtEnable) log.info "${device.displayName} has departed"
 		updateAttr("vehStatus", "not present")
 	}
     }
