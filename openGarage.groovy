@@ -203,13 +203,15 @@ void processJc(dMap){
     if(dMap.vehicle.toInteger() == 1){
 	// If vehStatus has changed, log and update attribute
 	if (device.currentValue("vehStatus") != "present"){
-		if(txtEnable) log.info "${device.displayName} has arrived"
+		if(txtEnable) log.info "${device.displayName} vehicle arrived"
 		updateAttr("vehStatus", "present")
 	}
+    } else if(dMap.vehicle.toInteger() == 2){
+    	if(txtEnable) log.info "${device.displayName} vehicle unknown"
     } else { // vehicle == 0
-		
+	// If vehStatus has changed, log and update attribute	
 	if(device.currentValue("vehStatus") != "not present"){
-		if(txtEnable) log.info "${device.displayName} has departed"
+		if(txtEnable) log.info "${device.displayName} vehicle departed"
 		updateAttr("vehStatus", "not present")
 	}
     }
