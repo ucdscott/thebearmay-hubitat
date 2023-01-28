@@ -16,6 +16,7 @@
  *    ----        ---            ----
  * 2023-01--4	thebearmay	Initial release
  * 2023-01-16	ucdscott	Added txtEnable logging, changed debugEnable preference to Hubitat de facto standard logEnable, updated Change History
+ * 2023-01-27	ucdscott	Switched to inline logging, added check for vehicle status 'unknow', and changed attribute setting logic
  *
  */
 
@@ -202,17 +203,18 @@ void processJc(dMap){
 	    
     if(dMap.vehicle.toInteger() == 1){
 	// If vehStatus has changed, log and update attribute
-	if (device.currentValue("vehStatus") != "present"){
+	if (device.currentValue("vehStatus") != "arrived"){
 		if(txtEnable) log.info "${device.displayName} vehicle arrived"
-		updateAttr("vehStatus", "present")
+		updateAttr("vehStatus", "arrived")
 	}
     } else if(dMap.vehicle.toInteger() == 2){
     	if(txtEnable) log.info "${device.displayName} vehicle unknown"
+	updateAttr("vehStatus", "unknown")
     } else { // vehicle == 0
 	// If vehStatus has changed, log and update attribute	
-	if(device.currentValue("vehStatus") != "not present"){
+	if(device.currentValue("vehStatus") != "departed"){
 		if(txtEnable) log.info "${device.displayName} vehicle departed"
-		updateAttr("vehStatus", "not present")
+		updateAttr("vehStatus", "departed")
 	}
     }
 }
