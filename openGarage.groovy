@@ -106,7 +106,7 @@ void close() {
 
 // HTTP GET to toggle relay
 void toggleDoor() {
-    if(txtEnable) log.debug "Toggling ${device.displayName}..."
+    if(logEnable) log.debug "Toggling ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
@@ -141,7 +141,7 @@ void updateAttr(String aKey, aValue, String aUnit = ""){
 }
 
 void poll(){
-    if(txtEnable) log.info "Polling ${device.displayName}..."
+    if(logEnable) log.debug "Polling ${device.displayName}..."
     httpGet(
         [
             uri: "http://$devIP",
